@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "Web Flasher Workbench"
+  },
+  "help": {
+    "tooltip": "Help"
+  },
+  "language": {
+    "label": "Language",
+    "auto": "System",
+    "zh": "中文",
+    "en": "English"
+  },
+  "zones": {
+    "target": "Target",
+    "flasher": "Programmer",
+    "firmware": "Firmware",
+    "download": "Download"
+  },
+  "flasherPage": {
+    "downloadBlocked": "Select a programmer connection and load firmware first.",
+    "flashNotImplemented": "This programmer does not implement flashing yet.",
+    "downloadCompleted": "Download finished.",
+    "connected": "Connected",
+    "notSelected": "Not selected",
+    "runtimeUnavailable": "Current programmer unavailable. {hint}",
+    "noConnectionNeeded": "This programmer does not require a connection step.",
+    "selectConnectionFirst": "Select a programmer connection first."
+  },
+  "firmware": {
+    "input": "Input",
+    "noFile": "No file (.hex / .bin / .elf)",
+    "dragHint": "Drag firmware here",
+    "selectFile": "Select file",
+    "unavailable": "This mode is unavailable. {hint}"
+  },
+  "download": {
+    "idle": "Download",
+    "again": "Download again",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "logMessages": {
+    "stage": "Stage: {stage}",
+    "progress": "Progress {percent}% ({written} / {total}, {speed}, ETA {eta})",
+    "starting": "Starting download",
+    "usingPlugin": "Using plugin: {name}",
+    "succeeded": "Download succeeded",
+    "failed": "Download failed: {message}"
+  },
+  "log": {
+    "empty": "No logs yet",
+    "context": "Details",
+    "title": "Logs",
+    "show": "Show",
+    "hide": "Hide",
+    "all": "All",
+    "none": "None",
+    "clear": "Clear",
+    "export": "Export",
+    "filterLevels": "Filter logs by level",
+    "level": {
+      "trace": "Trace",
+      "debug": "Debug",
+      "info": "Info",
+      "warning": "Warning",
+      "error": "Error"
+    }
+  },
+  "browser": {
+    "names": {
+      "safari": "Safari",
+      "chrome": "Chrome",
+      "edge": "Edge",
+      "arc": "Arc",
+      "firefox": "Firefox",
+      "opera": "Opera",
+      "samsung": "Samsung Internet",
+      "webview": "embedded browser",
+      "unknown": "This browser"
+    },
+    "overlay": {
+      "titleWithName": "Not supported: {name} browser access",
+      "bodyWithName": "Please use Chrome, Edge, Arc, or similar browsers to visit this site.",
+      "copyLink": "Copy page link",
+      "copied": "Copied",
+      "copyFailed": "Could not copy. Copy the address from the bar manually.",
+      "openHint": "If the page does not open automatically, copy the link and open it in the corresponding browser.",
+      "invalidPageUrlForSchemes": "This address is not http/https, so one-click links cannot be built. Use the copy action instead."
+    },
+    "tileCaption": {
+      "chrome": "Open in Chrome",
+      "edge": "Open in Edge",
+      "arc": "Open in Arc",
+      "copy": "Copy URL"
+    }
+  },
+  "target": {
+    "autoPicked": "Target auto-selected from this session: {type}",
+    "title": "Select target",
+    "freq": "Freq (MHz)",
+    "flash": "Flash (KB)",
+    "sram": "SRAM (KB)",
+    "cancel": "Cancel",
+    "confirm": "Use selected target",
+    "remember": "Remember choice (clears on page refresh)",
+    "selectionCancelled": "Target selection was cancelled",
+    "selectionCancelledLog": "Target selection cancelled ({plugin})",
+    "columns": {
+      "family": "Family",
+      "clock": "Clock",
+      "flash": "Flash",
+      "ram": "RAM"
+    },
+    "units": {
+      "mhz": "MHz",
+      "kb": "KB"
+    }
+  }
+}

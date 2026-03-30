@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "Web Flasher 工作台"
+  },
+  "help": {
+    "tooltip": "帮助"
+  },
+  "language": {
+    "label": "语言",
+    "auto": "跟随系统",
+    "zh": "中文",
+    "en": "English"
+  },
+  "zones": {
+    "target": "目标",
+    "flasher": "烧录器",
+    "firmware": "固件",
+    "download": "下载"
+  },
+  "flasherPage": {
+    "downloadBlocked": "请先选择烧录器连接并加载固件文件",
+    "flashNotImplemented": "该烧录器暂未实现下载流程",
+    "downloadCompleted": "下载流程已结束",
+    "connected": "已连接",
+    "notSelected": "未选择",
+    "runtimeUnavailable": "当前烧录器不可用。{hint}",
+    "noConnectionNeeded": "当前烧录器不需要建立连接",
+    "selectConnectionFirst": "请先选择烧录器连接"
+  },
+  "firmware": {
+    "input": "输入模式",
+    "noFile": "未选择文件（.hex / .bin / .elf）",
+    "dragHint": "将固件拖放到此处",
+    "selectFile": "选择文件",
+    "unavailable": "当前模式不可用。{hint}"
+  },
+  "download": {
+    "idle": "下载",
+    "again": "再次下载",
+    "completed": "已完成",
+    "failed": "失败"
+  },
+  "logMessages": {
+    "stage": "阶段：{stage}",
+    "progress": "进度 {percent}%（已写入 {written} / 共 {total}，{speed}，剩余时间 {eta}）",
+    "starting": "开始下载",
+    "usingPlugin": "使用插件：{name}",
+    "succeeded": "下载成功",
+    "failed": "下载失败：{message}"
+  },
+  "log": {
+    "empty": "暂无日志",
+    "context": "详情",
+    "title": "日志",
+    "show": "展开",
+    "hide": "收起",
+    "all": "全部",
+    "none": "无",
+    "clear": "清空",
+    "export": "导出",
+    "filterLevels": "按级别筛选日志",
+    "level": {
+      "trace": "跟踪",
+      "debug": "调试",
+      "info": "信息",
+      "warning": "警告",
+      "error": "错误"
+    }
+  },
+  "browser": {
+    "names": {
+      "safari": "Safari",
+      "chrome": "Chrome",
+      "edge": "Edge",
+      "arc": "Arc",
+      "firefox": "Firefox",
+      "opera": "Opera",
+      "samsung": "Samsung Internet",
+      "webview": "内置浏览器",
+      "unknown": "当前浏览器"
+    },
+    "overlay": {
+      "titleWithName": "目前暂不支持{name}浏览器",
+      "bodyWithName": "请使用Chrome、Edge、Arc等浏览器访问",
+      "copyLink": "复制当前链接",
+      "copied": "已复制",
+      "copyFailed": "复制失败，请手动复制地址栏中的链接",
+      "openHint": "若未能自动跳转，请手动拷贝链接后到对应的浏览器中打开",
+      "invalidPageUrlForSchemes": "当前地址不是 http/https，无法生成一键跳转链接，请使用「拷贝链接」手动打开。"
+    },
+    "tileCaption": {
+      "chrome": "使用 Chrome 访问",
+      "edge": "使用 Edge 访问",
+      "arc": "使用 Arc 访问",
+      "copy": "拷贝 URL"
+    }
+  },
+  "target": {
+    "autoPicked": "已按本次会话记忆自动选择目标：{type}",
+    "title": "选择目标",
+    "freq": "主频 (MHz)",
+    "flash": "Flash (KB)",
+    "sram": "SRAM (KB)",
+    "cancel": "取消",
+    "confirm": "使用所选目标",
+    "remember": "记住选择（页面刷新后失效）",
+    "selectionCancelled": "已取消目标型号选择",
+    "selectionCancelledLog": "已取消目标选择（{plugin}）",
+    "columns": {
+      "family": "家族",
+      "clock": "主频",
+      "flash": "Flash",
+      "ram": "RAM"
+    },
+    "units": {
+      "mhz": "MHz",
+      "kb": "KB"
+    }
+  }
+}

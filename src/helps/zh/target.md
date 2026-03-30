@@ -1,6 +1,6 @@
 # 目标
 
-请先选择 MCU 系列。
+请先选择目标系列。
 
 - `STM32`：启用 STM32 兼容的 Flasher。
 - `ESP32`：启用 ESP32 兼容的 Flasher。

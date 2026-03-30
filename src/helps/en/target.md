@@ -1,6 +1,6 @@
 # Target
 
-Choose the target MCU family first.
+Choose the target chip family first.
 
 - `STM32`: Enables STM32-compatible flashers.
 - `ESP32`: Enables ESP32-compatible flashers.
