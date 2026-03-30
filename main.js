@@ -119,9 +119,9 @@ btnBurn.onclick = async () => {
   }
   if (!firmwareBuffer) return;
   // 新增：根据模式分支
-  if (mode === "STLINK") {
+  if (mode === "st-link") {
     try {
-      log("🔌 正在连接STLINK设备...");
+      log("🔌 正在连接 st-link 设备...");
       // 选择 STLINK 设备，带过滤器
       const device = await navigator.usb.requestDevice({
         filters:
@@ -161,15 +161,15 @@ btnBurn.onclick = async () => {
       const stlink = new WebStlink(logger);
       await stlink.attach(device);
       await stlink.detect_cpu([], pick_sram_variant);
-      log("✅ STLINK已连接: " + device.productName);
-      log("📝 开始通过STLINK写入固件...");
+      log("✅ st-link 已连接: " + device.productName);
+      log("📝 开始通过 st-link 写入固件...");
       setProgress(0);
       const stlinkrate =
         parseInt(document.getElementById("stlinkrate").value, 10) || 1800000;
       // WebStlink.flash(addr, data) 支持 Uint8Array
       await stlink.flash(firmwareBaseAddr, new Uint8Array(firmwareBuffer));
       setProgress(100);
-      log("🎉 STLINK固件烧录完成！");
+      log("🎉 st-link 固件烧录完成！");
       try {
         await stlink.reset(false); // 自动复位MCU
         log("♻️ 已自动复位MCU");
@@ -177,9 +177,9 @@ btnBurn.onclick = async () => {
         log("⚠️ 自动复位失败: " + (e && e.message ? e.message : e));
       }
       await stlink.detach();
-      log("⛓️‍💥 STLINK已断开");
+      log("⛓️‍💥 st-link 已断开");
     } catch (e) {
-      log("❌ STLINK烧录失败: " + (e && e.message ? e.message : e));
+      log("❌ st-link 烧录失败: " + (e && e.message ? e.message : e));
     }
     isBurning = false;
     isCancelRequested = false;
@@ -195,19 +195,47 @@ btnBurn.onclick = async () => {
     updateBurnBtnState();
     return;
   }
-  if (mode === "UART") {
+  if (mode === "usb-dfu") {
     try {
-      console.log("即将调用navigator.serial.requestPort");
+      log("🔌 usb-dfu 模式：将跳转到 webdfu/dfu-util 页面进行烧录...");
+      window.open(
+        "./webdfu/dfu-util/index.html",
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } catch (e) {
+      log("❌ usb-dfu 跳转失败: " + (e && e.message ? e.message : e));
+    }
+    return;
+  }
+  if (mode === "dap-link") {
+    try {
+      log(
+        "🔌 dap-link 模式：主页暂未内置烧录流程，将打开 webdap 示例页参考..."
+      );
+      window.open(
+        "./webdap/examples/index.html",
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } catch (e) {
+      log("❌ dap-link 打开示例失败: " + (e && e.message ? e.message : e));
+    }
+    return;
+  }
+  if (mode === "serial") {
+    try {
+      console.log("即将调用 navigator.serial.requestPort");
       if (navigator.serial && navigator.serial.requestPort) {
         port = await navigator.serial.requestPort();
-        log("✅ 串口已选择");
+        log("✅ serial（UART）已选择");
         // 这里可以继续你的串口通信逻辑...
       } else {
         log("❌ 当前浏览器不支持Web Serial API");
       }
     } catch (e) {
-      console.error("UART分支异常:", e);
-      log("❌ 串口连接失败: " + e.message);
+      console.error("serial 分支异常:", e);
+      log("❌ serial（UART）连接失败: " + e.message);
     }
     return;
   }
@@ -343,15 +371,18 @@ updateBurnBtnState();
 
 function updateModeOptions() {
   const mode = document.querySelector('input[name="mode"]:checked').value;
-  if (mode === "UART") {
+  if (mode === "serial") {
     baudrateContainer.style.display = "";
     stlinkrateContainer.style.display = "none";
-  } else if (mode === "USB") {
+  } else if (mode === "usb-dfu") {
     baudrateContainer.style.display = "none";
     stlinkrateContainer.style.display = "none";
-  } else if (mode === "STLINK") {
+  } else if (mode === "st-link") {
     baudrateContainer.style.display = "none";
     stlinkrateContainer.style.display = "";
+  } else if (mode === "dap-link") {
+    baudrateContainer.style.display = "none";
+    stlinkrateContainer.style.display = "none";
   }
 }
 modeRadios.forEach((r) => r.addEventListener("change", updateModeOptions));
@@ -370,12 +401,14 @@ const guideCache = new Map();
 
 function getModeToGuideKey(mode) {
   switch (mode) {
-    case "UART":
+    case "serial":
       return "serial";
-    case "USB":
+    case "usb-dfu":
       return "usb-dfu";
-    case "STLINK":
-      return "stlink";
+    case "st-link":
+      return "st-link";
+    case "dap-link":
+      return "dap-link";
     default:
       return "serial";
   }

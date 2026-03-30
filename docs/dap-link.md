@@ -1,4 +1,4 @@
-# DAP-Link 模式（dap-link）
+# dap-link 模式（dap-link / DAPLink）
 
 此模式通过 DAPLink（CMSIS-DAP 兼容调试器）通过 SWD 写入目标芯片 Flash（一般基于 WebUSB/Web HID 相关实现）。
 
@@ -19,7 +19,7 @@
 
 ## 网页操作步骤
 
-1. 在主页选择 `DAP-LINK`/`dap-link` 模式（如果当前版本页面未展示该模式，请先更新/检查主页实现）。
+1. 在主页选择 `dap-link` 模式。
 2. 选择固件文件（支持 `*.hex` / `*.bin`）。
 3. 点击「下载固件」。
 4. 浏览器会弹出设备授权/选择窗口，选择你的 DAPLink 设备并确认。

@@ -79,19 +79,24 @@
             <!-- 模式选择控件 -->
             <div class="flex flex-row justify-between items-center w-full mt-2 mb-2">
                 <label class="flex-1">
-                    <input type="radio" name="mode" value="UART" class="peer hidden" checked />
+                    <input type="radio" name="mode" value="serial" class="peer hidden" checked />
                     <span
-                        class="block cursor-pointer select-none text-center py-2 rounded-l-lg border border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">UART</span>
+                        class="block cursor-pointer select-none text-center py-2 rounded-l-lg border border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">serial</span>
                 </label>
                 <label class="flex-1">
-                    <input type="radio" name="mode" value="USB" class="peer hidden" />
+                    <input type="radio" name="mode" value="usb-dfu" class="peer hidden" />
                     <span
-                        class="block cursor-pointer select-none text-center py-2 border-t border-b border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">USB</span>
+                        class="block cursor-pointer select-none text-center py-2 border-t border-b border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">usb-dfu</span>
                 </label>
                 <label class="flex-1">
-                    <input type="radio" name="mode" value="STLINK" class="peer hidden" />
+                    <input type="radio" name="mode" value="st-link" class="peer hidden" />
                     <span
-                        class="block cursor-pointer select-none text-center py-2 rounded-r-lg border border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">STLINK</span>
+                        class="block cursor-pointer select-none text-center py-2 border-t border-b border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">st-link</span>
+                </label>
+                <label class="flex-1">
+                    <input type="radio" name="mode" value="dap-link" class="peer hidden" />
+                    <span
+                        class="block cursor-pointer select-none text-center py-2 rounded-r-lg border border-gray-300 bg-gray-50 text-blue-700 font-semibold peer-checked:bg-blue-500 peer-checked:text-white transition-colors">dap-link</span>
                 </label>
             </div>
         </div>
@@ -109,7 +114,7 @@
                 <span>波特率</span>
             </div>
         </div>
-        <!-- STLINK速率选择，初始隐藏 -->
+        <!-- st-link速率选择，初始隐藏 -->
         <div class="mb-6" id="stlinkrate-container" style="display:none;">
             <select id="stlinkrate"
                 class="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 mb-1">
@@ -192,19 +197,19 @@
             <div class="flex flex-row flex-wrap gap-2 mb-3" role="tablist" aria-label="模式选择">
                 <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
                     data-key="serial" aria-selected="true">
-                    Serial
+                    serial
                 </button>
                 <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
                     data-key="usb-dfu" aria-selected="false">
-                    USB-DFU
+                    usb-dfu
                 </button>
                 <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
-                    data-key="stlink" aria-selected="false">
-                    STLINK
+                    data-key="st-link" aria-selected="false">
+                    st-link
                 </button>
                 <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
                     data-key="dap-link" aria-selected="false">
-                    DAP-LINK
+                    dap-link
                 </button>
             </div>
 
