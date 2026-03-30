@@ -1,3 +1,7 @@
+// DEPRECATED:
+// Legacy UART ISP implementation (HTML+JS era). The Vue app's `stm32-serial`
+// protocol uses `src/protocols/stm32/serial/UartIsp.ts` instead.
+
 // stm32f1_isp.js
 // 适用于STM32F1官方串口ISP协议（AN3155），通过Web Serial API
 

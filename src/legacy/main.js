@@ -1,6 +1,10 @@
+// DEPRECATED:
+// This is the legacy HTML+JS entrypoint. The Vue app uses `src/main.ts` and does not
+// depend on this file. It is kept temporarily for reference/rollback.
+
 import UARTISP, { hexToBin } from "./uart_isp.js";
-import WebStlink from "./webstlink/src/webstlink.js";
-import { Logger } from "./webstlink/src/lib/package.js";
+import WebStlink from "../../vendor/protocols/webstlink/src/webstlink.js";
+import { Logger } from "../../vendor/protocols/webstlink/src/lib/package.js";
 
 // Web Serial API 支持性检查
 if (!("serial" in navigator)) {
@@ -199,7 +203,7 @@ btnBurn.onclick = async () => {
     try {
       log("🔌 usb-dfu 模式：将跳转到 webdfu/dfu-util 页面进行烧录...");
       window.open(
-        "./webdfu/dfu-util/index.html",
+        "./vendor/protocols/webdfu/dfu-util/index.html",
         "_blank",
         "noopener,noreferrer"
       );
@@ -214,7 +218,7 @@ btnBurn.onclick = async () => {
         "🔌 dap-link 模式：主页暂未内置烧录流程，将打开 webdap 示例页参考..."
       );
       window.open(
-        "./webdap/examples/index.html",
+        "./vendor/protocols/webdap/examples/index.html",
         "_blank",
         "noopener,noreferrer"
       );
