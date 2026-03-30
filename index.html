@@ -15,6 +15,36 @@
             background: #f1f5f9 !important;
             color: #60a5fa !important;
         }
+
+        /* 让 Markdown 在弹窗里更可读（不依赖 tailwind-typography 插件） */
+        #guide-content h1,
+        #guide-content h2 {
+            font-weight: 800;
+            margin: 0.75rem 0 0.4rem;
+        }
+        #guide-content p {
+            margin: 0.5rem 0;
+        }
+        #guide-content ul {
+            padding-left: 1.25rem;
+            list-style: disc;
+        }
+        #guide-content code {
+            background: #f3f4f6;
+            padding: 0.1rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+        #guide-content pre {
+            background: #111827;
+            color: #e5e7eb;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            overflow: auto;
+        }
+        #guide-content a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
     </style>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DF0H4EQE36"></script>
@@ -115,7 +145,11 @@
         <div class="log font-mono text-xs bg-gray-900 text-green-200 rounded-lg p-4 h-36 overflow-y-auto whitespace-pre-wrap border border-gray-800 shadow-inner"
             id="log"></div>
 
-        <div class="flex items-center justify-center mb-4">
+        <div class="flex items-center justify-center mb-4 gap-3">
+            <button id="btn-guide"
+                class="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-colors border border-gray-200">
+                使用指南
+            </button>
             <a href="https://github.com/insightop/stm32.download" target="_blank" rel="noopener noreferrer"
                 class="ml-3 text-gray-600 hover:text-blue-700 transition-colors" title="查看GitHub仓库">
                 <i class="fab fa-github text-2xl"></i>
@@ -144,6 +178,44 @@
             </menu>
         </form>
     </dialog>
+
+    <dialog id="guideDialog" class="rounded-xl shadow-2xl p-0 border-2 border-blue-400 w-full max-w-md">
+        <form method="dialog" class="p-4">
+            <div class="flex items-center justify-between mb-3 gap-3">
+                <div class="text-lg font-bold text-blue-700">模式使用指南</div>
+                <button value="cancel"
+                    class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">
+                    关闭
+                </button>
+            </div>
+
+            <div class="flex flex-row flex-wrap gap-2 mb-3" role="tablist" aria-label="模式选择">
+                <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
+                    data-key="serial" aria-selected="true">
+                    Serial
+                </button>
+                <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
+                    data-key="usb-dfu" aria-selected="false">
+                    USB-DFU
+                </button>
+                <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
+                    data-key="stlink" aria-selected="false">
+                    STLINK
+                </button>
+                <button type="button" class="guide-tab px-3 py-1 rounded border border-gray-300 bg-gray-50 text-blue-700 font-semibold"
+                    data-key="dap-link" aria-selected="false">
+                    DAP-LINK
+                </button>
+            </div>
+
+            <div id="guide-content" class="text-sm text-gray-800 max-h-[60vh] overflow-y-auto">
+                <div class="text-gray-500">正在加载指南...</div>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- 运行时把 Markdown 渲染到页面（不引入构建工具） -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module" src="./main.js"></script>
 </body>
 

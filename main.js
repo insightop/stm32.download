@@ -358,6 +358,108 @@ modeRadios.forEach((r) => r.addEventListener("change", updateModeOptions));
 // 页面加载时初始化
 updateModeOptions();
 
+// --------------------
+// 模式使用指南（docs 渲染）
+// --------------------
+const btnGuide = document.getElementById("btn-guide");
+const guideDialog = document.getElementById("guideDialog");
+const guideContentEl = document.getElementById("guide-content");
+const guideTabs = document.querySelectorAll(".guide-tab");
+
+const guideCache = new Map();
+
+function getModeToGuideKey(mode) {
+  switch (mode) {
+    case "UART":
+      return "serial";
+    case "USB":
+      return "usb-dfu";
+    case "STLINK":
+      return "stlink";
+    default:
+      return "serial";
+  }
+}
+
+function getCurrentModeGuideKey() {
+  const checked = document.querySelector('input[name="mode"]:checked');
+  const mode = checked ? checked.value : null;
+  return getModeToGuideKey(mode);
+}
+
+function setActiveGuideTab(key) {
+  guideTabs.forEach((tab) => {
+    const isActive = tab.dataset.key === key;
+    tab.setAttribute("aria-selected", isActive ? "true" : "false");
+    if (isActive) {
+      tab.classList.remove(
+        "bg-gray-50",
+        "text-blue-700",
+        "border-gray-300"
+      );
+      tab.classList.add("bg-blue-600", "text-white", "border-blue-600");
+    } else {
+      tab.classList.remove("bg-blue-600", "text-white", "border-blue-600");
+      tab.classList.add("bg-gray-50", "text-blue-700", "border-gray-300");
+    }
+  });
+}
+
+async function loadGuideMarkdown(guideKey) {
+  if (!guideContentEl) return;
+  if (!guideKey) guideKey = "serial";
+
+  const cached = guideCache.get(guideKey);
+  if (cached) {
+    guideContentEl.innerHTML = cached;
+    return;
+  }
+
+  guideContentEl.innerHTML = `<div class="text-gray-500">正在加载指南：${guideKey}...</div>`;
+
+  try {
+    if (!window.marked || typeof window.marked.parse !== "function") {
+      throw new Error("marked 未加载，无法渲染 Markdown");
+    }
+
+    const url = new URL(`./docs/${guideKey}.md`, window.location.href);
+    const resp = await fetch(url.toString());
+    if (!resp.ok) {
+      throw new Error(`加载失败：HTTP ${resp.status}`);
+    }
+    const md = await resp.text();
+    const html = window.marked.parse(md);
+    guideCache.set(guideKey, html);
+    guideContentEl.innerHTML = html;
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    guideContentEl.innerHTML = `<div class="text-red-600 font-semibold">指南加载失败：${msg}</div>`;
+  }
+}
+
+if (btnGuide && guideDialog) {
+  btnGuide.addEventListener("click", async () => {
+    const initialKey = getCurrentModeGuideKey();
+    setActiveGuideTab(initialKey);
+    if (typeof guideDialog.showModal === "function") {
+      guideDialog.showModal();
+    } else {
+      // 兼容性兜底：显示为普通块
+      guideDialog.setAttribute("open", "open");
+    }
+    await loadGuideMarkdown(initialKey);
+  });
+}
+
+guideTabs.forEach((tab) => {
+  tab.addEventListener("click", async () => {
+    const key = tab.dataset.key;
+    if (!key) return;
+    setActiveGuideTab(key);
+    await loadGuideMarkdown(key);
+  });
+});
+
 // MCU选型弹窗逻辑，参考webstlink demo
 async function pick_sram_variant(mcu_list) {
   const dialog = document.getElementById("mcuDialog");
