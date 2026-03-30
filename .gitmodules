@@ -1,12 +1,12 @@
 [submodule "webstlink"]
-	path = webstlink
+	path = vendor/protocols/webstlink
 	url = https://github.com/devanlai/webstlink/
 [submodule "webdfu"]
-	path = webdfu
+	path = vendor/protocols/webdfu
 	url = https://github.com/devanlai/webdfu
 [submodule "webdap"]
-	path = webdap
+	path = vendor/protocols/webdap
 	url = https://github.com/ARMmbed/dapjs
 [submodule "webserial"]
-	path = webserial
+	path = vendor/protocols/webserial
 	url = https://github.com/yanxke/stm32webflash
