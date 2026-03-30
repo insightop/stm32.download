@@ -4,3 +4,9 @@
 [submodule "webdfu"]
 	path = webdfu
 	url = https://github.com/devanlai/webdfu
+[submodule "webdap"]
+	path = webdap
+	url = https://github.com/ARMmbed/dapjs
+[submodule "webserial"]
+	path = webserial
+	url = https://github.com/yanxke/stm32webflash
