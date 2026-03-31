@@ -14,6 +14,7 @@ import TargetVariantDialog from "@/features/flasher/components/TargetVariantDial
 import LanguageSwitcher from "@/features/flasher/components/LanguageSwitcher.vue";
 import { useFlasherStore } from "@/features/flasher/stores/flasher.store";
 import {
+  getCurrentPluginMeta,
   getFlasherOptionsForTarget,
   getFlasherRuntimeInfo,
   prepareFlasherForCurrentSelection,
@@ -23,6 +24,7 @@ import { flasherLogger } from "@/features/flasher/services/flasherLogger";
 import { createStlinkTargetSession, tryAutoPickTarget } from "@/features/flasher/services/stlinkTargetPreference";
 import type { StlinkTargetVariant } from "@/transports/adapters/stlink.adapter";
 import { i18n } from "@/i18n";
+import type { PluginConfigObject } from "@/plugins/config/pluginConfig.types";
 
 const { t } = useI18n();
 const store = useFlasherStore();
@@ -44,7 +46,28 @@ const collapseLogPanel = (): void => {
   logPanelExpanded.value = false;
 };
 
-const syncFlasherSelection = async (): Promise<void> => {
+const currentPlugin = computed(() => getCurrentPluginMeta());
+const currentPluginConfigSchema = computed(() => currentPlugin.value?.configSchema ?? null);
+const currentPluginConfig = computed<PluginConfigObject>(() => {
+  const plugin = currentPlugin.value;
+  if (!plugin) return {};
+  const defaults = plugin.createDefaultConfig?.() ?? {};
+  const current = store.getPluginConfig(plugin.id) ?? {};
+  return { ...defaults, ...current };
+});
+
+
+
+function syncPluginConfigState(): void {
+  const plugin = currentPlugin.value;
+  if (!plugin || !plugin.createDefaultConfig) return;
+  const existing = store.getPluginConfig(plugin.id);
+  const normalized = plugin.normalizeConfig?.(existing) ?? { ...plugin.createDefaultConfig(), ...(existing ?? {}) };
+  store.initPluginConfig(plugin.id, plugin.createDefaultConfig());
+  store.setPluginConfig(plugin.id, normalized);
+}
+
+const syncFlasherSelection = async (forceReselect = false): Promise<void> => {
   const currentValid = flasherOptions.value.some((opt) => opt.flasherType === store.flasherType);
   if (!currentValid) {
     const firstSupported = flasherOptions.value.find((opt) => opt.isSupported) ?? flasherOptions.value[0];
@@ -52,9 +75,10 @@ const syncFlasherSelection = async (): Promise<void> => {
       store.setFlasherType(firstSupported.flasherType);
     }
   }
+  syncPluginConfigState();
   store.setFlasherRuntime(getFlasherRuntimeInfo());
   try {
-    await prepareFlasherForCurrentSelection();
+    await prepareFlasherForCurrentSelection({ forceReselect });
   } catch (error) {
     flasherLogger.error(error instanceof Error ? error.message : String(error));
   }
@@ -140,6 +164,24 @@ const download = async (): Promise<void> => {
   }
 };
 
+
+const onPluginConfigFieldUpdate = (key: string, value: string | number | boolean): void => {
+  const plugin = currentPlugin.value;
+  if (!plugin) return;
+  store.updatePluginConfigField(plugin.id, key, value);
+  const existing = store.getPluginConfig(plugin.id);
+  const normalized = plugin.normalizeConfig?.(existing) ?? existing;
+  if (normalized) {
+    store.setPluginConfig(plugin.id, normalized);
+  }
+  void syncFlasherSelection();
+};
+
+const onFlasherReenter = (): void => {
+  store.clearStlinkTargetSession();
+  void syncFlasherSelection(true);
+};
+
 const onTargetConfirm = (payload: { type: string; remember: boolean }): void => {
   if (payload.remember) {
     store.setStlinkTargetSession(createStlinkTargetSession(store.targetCandidates, payload.type));
@@ -194,7 +236,11 @@ const onTargetCancel = (): void => {
             :options="flasherOptions"
             :flasher-label="store.flasherLabel"
             :flasher-error="store.flasherError"
+            :config-schema="currentPluginConfigSchema"
+            :config="currentPluginConfig"
             @update:value="store.setFlasherType"
+            @reenter="onFlasherReenter"
+            @update:field="onPluginConfigFieldUpdate"
           />
           <FirmwareInputPanel ref="firmwareInput" />
           <DownloadPanel

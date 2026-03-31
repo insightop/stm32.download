@@ -3,7 +3,9 @@ import { useI18n } from "vue-i18n";
 import { NButton, NButtonGroup, NText } from "naive-ui";
 import { FlashOutline } from "@vicons/ionicons5";
 import FunctionZone from "@/features/flasher/components/FunctionZone.vue";
+import PluginConfigPanel from "@/features/flasher/components/PluginConfigPanel.vue";
 import type { FlasherOption } from "@/features/flasher/services/flasherFacade";
+import type { PluginConfigObject, PluginConfigSchema } from "@/plugins/config/pluginConfig.types";
 
 const { t } = useI18n();
 
@@ -12,8 +14,22 @@ const props = defineProps<{
   options: FlasherOption[];
   flasherLabel: string | null;
   flasherError: string | null;
+  configSchema: PluginConfigSchema | null;
+  config: PluginConfigObject;
 }>();
-const emit = defineEmits<{ "update:value": [value: "serial" | "usb-dfu" | "st-link" | "dap-link"] }>();
+const emit = defineEmits<{
+  "update:value": [value: "serial" | "usb-dfu" | "st-link" | "dap-link"];
+  reenter: [];
+  "update:field": [key: string, value: string | number | boolean];
+}>();
+
+function onClickFlasher(value: "serial" | "usb-dfu" | "st-link" | "dap-link"): void {
+  if (props.value === value) {
+    emit("reenter");
+    return;
+  }
+  emit("update:value", value);
+}
 </script>
 
 <template>
@@ -29,7 +45,7 @@ const emit = defineEmits<{ "update:value": [value: "serial" | "usb-dfu" | "st-li
         class="btn"
         :type="props.value === option.flasherType ? 'primary' : 'default'"
         :disabled="!option.isSupported"
-        @click="emit('update:value', option.flasherType)"
+        @click="onClickFlasher(option.flasherType)"
       >
         {{ option.flasherType }}
       </NButton>
@@ -41,6 +57,11 @@ const emit = defineEmits<{ "update:value": [value: "serial" | "usb-dfu" | "st-li
         class="warn"
       > ({{ props.flasherError }})</span>
     </NText>
+    <PluginConfigPanel
+      :schema="props.configSchema"
+      :config="props.config"
+      @update:field="(key, value) => emit('update:field', key, value)"
+    />
   </FunctionZone>
 </template>
 

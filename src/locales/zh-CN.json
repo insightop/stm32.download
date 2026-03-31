@@ -116,5 +116,35 @@
       "mhz": "MHz",
       "kb": "KB"
     }
+  },
+  "dfu": {
+    "probeFailed": "DFU 设备连接或探测失败，请确认设备已进入 DFU 模式。",
+    "syncFailed": "DFU 状态同步失败，请重新连接设备后重试。",
+    "eraseFailed": "DFU 擦除失败，请检查目标地址与设备保护状态。",
+    "flashFailed": "DFU 写入失败，请检查 USB 连接稳定性后重试。",
+    "resetFailed": "DFU 复位或断开失败，可手动重插设备。"
+  },
+  "pluginConfig": {
+    "title": "烧录参数",
+    "serial": {
+      "baudRate": {
+        "label": "波特率 (baud)",
+        "help": "串口打开速率，常用 115200 / 460800"
+      }
+    },
+    "stlink": {
+      "debugInterface": {
+        "label": "调试接口",
+        "help": "选择 SWD 或 JTAG 连接方式",
+        "option": {
+          "swd": "SWD",
+          "jtag": "JTAG"
+        }
+      },
+      "debugClockHz": {
+        "label": "调试时钟 (Hz)",
+        "help": "ST-Link 调试时钟频率，过高可能导致不稳定"
+      }
+    }
   }
 }

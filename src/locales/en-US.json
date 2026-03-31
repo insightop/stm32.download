@@ -116,5 +116,35 @@
       "mhz": "MHz",
       "kb": "KB"
     }
+  },
+  "dfu": {
+    "probeFailed": "DFU probe failed. Ensure device is in DFU mode.",
+    "syncFailed": "Failed to synchronize DFU state. Reconnect and retry.",
+    "eraseFailed": "DFU erase failed. Check target address and protection state.",
+    "flashFailed": "DFU write failed. Check USB connection stability and retry.",
+    "resetFailed": "DFU reset/detach failed. You may need to replug device manually."
+  },
+  "pluginConfig": {
+    "title": "Flasher settings",
+    "serial": {
+      "baudRate": {
+        "label": "Baud rate",
+        "help": "Serial open speed, common values: 115200 / 460800"
+      }
+    },
+    "stlink": {
+      "debugInterface": {
+        "label": "Debug interface",
+        "help": "Choose SWD or JTAG transport mode",
+        "option": {
+          "swd": "SWD",
+          "jtag": "JTAG"
+        }
+      },
+      "debugClockHz": {
+        "label": "Debug clock (Hz)",
+        "help": "ST-Link debug clock frequency; too high may be unstable"
+      }
+    }
   }
 }

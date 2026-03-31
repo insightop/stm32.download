@@ -1,6 +1,7 @@
 import type { DownloadTaskInput, FlashPlan, StageProgress } from "@/core/types/download";
 import type { FlasherProtocol, ProbeResult } from "@/protocols/types";
 import { ErrorCode, type DownloadError, isUserCancelledError } from "@/core/errors/ErrorCode";
+import type { PluginConfigObject } from "@/plugins/config/pluginConfig.types";
 import type { UsbTransport } from "@/transports/types";
 import {
   createStlinkAdapter,
@@ -14,6 +15,7 @@ export class Stm32StlinkProtocol implements FlasherProtocol {
   constructor(
     private readonly transport: UsbTransport,
     private readonly pickTargetVariant?: (candidates: StlinkTargetVariant[]) => Promise<string | null>,
+    private readonly config: PluginConfigObject = { debugInterface: "swd", debugClockHz: 1800000 },
   ) {}
 
   private mkError(code: ErrorCode, userMessage: string, cause: unknown): DownloadError {
@@ -24,7 +26,10 @@ export class Stm32StlinkProtocol implements FlasherProtocol {
   async probe(): Promise<ProbeResult> {
     try {
       const adapter = createStlinkAdapter(this.transport.getDevice());
-      await adapter.connect(this.pickTargetVariant);
+      await adapter.connect(this.pickTargetVariant, {
+        debugInterface: this.config.debugInterface === "jtag" ? "jtag" : "swd",
+        debugClockHz: Number(this.config.debugClockHz ?? 1800000),
+      });
       this.adapter = adapter;
       return { chipFamily: "stm32", chipName: "STM32-STLink" };
     } catch (cause) {

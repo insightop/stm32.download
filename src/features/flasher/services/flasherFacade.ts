@@ -3,6 +3,8 @@ import { isUserCancelledError } from "@/core/errors/ErrorCode";
 import { detectBrowserCapabilities, getBrowserSupportHint } from "@/plugins/capabilities";
 import { globalPluginRegistry } from "@/plugins/registry";
 import type { FlasherPlugin, PluginResolveCriteria, PluginRuntimeDeps } from "@/plugins/types";
+import { normalizeConfigBySchema } from "@/plugins/config/pluginConfig.validators";
+import type { PluginConfigObject } from "@/plugins/config/pluginConfig.types";
 import type { Transport } from "@/transports/types";
 import { useFlasherStore } from "@/features/flasher/stores/flasher.store";
 import { flasherLogger } from "@/features/flasher/services/flasherLogger";
@@ -23,6 +25,7 @@ function formatEtaSeconds(eta: number | null): string {
 
 interface PreparedTransportSession {
   pluginId: string;
+  configKey: string;
   transport: Transport;
 }
 
@@ -36,6 +39,22 @@ function resolveCurrentPlugin(): FlasherPlugin | null {
     capabilities: detectBrowserCapabilities(),
   };
   return globalPluginRegistry.tryResolve(criteria);
+}
+
+
+export function getCurrentPluginMeta(): FlasherPlugin | null {
+  return resolveCurrentPlugin();
+}
+
+function getPluginConfigSnapshot(plugin: FlasherPlugin): PluginConfigObject {
+  const store = useFlasherStore();
+  const defaults = plugin.createDefaultConfig?.() ?? {};
+  const raw = store.getPluginConfig(plugin.id);
+  if (plugin.normalizeConfig) {
+    return plugin.normalizeConfig(raw);
+  }
+  if (!plugin.configSchema) return { ...defaults, ...(raw ?? {}) };
+  return normalizeConfigBySchema(defaults, plugin.configSchema.fields, raw);
 }
 
 export interface FlasherOption {
@@ -78,7 +97,7 @@ export function getFlasherRuntimeInfo(): { canFlash: boolean; canSelectConnectio
   return { canFlash: plugin.canFlash, canSelectConnection: plugin.canSelectConnection, hint };
 }
 
-export async function prepareFlasherForCurrentSelection(): Promise<void> {
+export async function prepareFlasherForCurrentSelection(options?: { forceReselect?: boolean }): Promise<void> {
   const store = useFlasherStore();
   const plugin = resolveCurrentPlugin();
   if (!plugin) {
@@ -94,13 +113,16 @@ export async function prepareFlasherForCurrentSelection(): Promise<void> {
     hint: plugin.canFlash ? "" : t("flasherPage.flashNotImplemented"),
   });
 
-  if (prepared && prepared.pluginId !== plugin.id) {
+  const configSnapshot = getPluginConfigSnapshot(plugin);
+  const configKey = JSON.stringify(configSnapshot);
+
+  if (prepared && (prepared.pluginId !== plugin.id || prepared.configKey !== configKey || options?.forceReselect)) {
     await prepared.transport.close().catch(() => undefined);
     prepared = null;
   }
 
   if (!prepared) {
-    prepared = { pluginId: plugin.id, transport: plugin.createTransport() };
+    prepared = { pluginId: plugin.id, configKey, transport: plugin.createTransport(configSnapshot) };
   }
 
   if (!plugin.canSelectConnection) {
@@ -164,7 +186,8 @@ export async function startFlash(input: unknown, deps: PluginRuntimeDeps = {}): 
   };
 
   const transport = prepared.transport;
-  const protocol = plugin.createProtocol(transport, deps);
+  const configSnapshot = getPluginConfigSnapshot(plugin);
+  const protocol = plugin.createProtocol(transport, deps, configSnapshot);
   const speedWindow: Array<{ t: number; w: number }> = [];
 
   flasherLogger.info(t("logMessages.starting"), {
@@ -173,6 +196,7 @@ export async function startFlash(input: unknown, deps: PluginRuntimeDeps = {}): 
     flasherType: store.flasherType,
     chipFamily: store.chipFamily,
     deviceLabel: store.flasherLabel,
+    pluginConfig: configSnapshot,
   });
 
   let lastProgressLogAt = 0;

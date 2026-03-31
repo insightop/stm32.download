@@ -3,6 +3,7 @@ import type { DownloadStage } from "@/core/types/download";
 import type { StlinkTargetPreferenceV1 } from "@/features/flasher/services/stlinkTargetPreference";
 import type { StlinkTargetVariant } from "@/transports/adapters/stlink.adapter";
 import type { LogEntry, LogLevel } from "@/features/flasher/types/log";
+import type { PluginConfigObject } from "@/plugins/config/pluginConfig.types";
 
 export type DeviceStatus = "idle" | "selecting" | "ready" | "failed";
 export type DownloadResult = "idle" | "running" | "success" | "error";
@@ -31,6 +32,7 @@ export const useFlasherStore = defineStore("flasher", {
     targetCandidates: [] as StlinkTargetVariant[],
     selectedTargetType: null as string | null,
     stlinkTargetSession: null as StlinkTargetPreferenceV1 | null,
+    pluginConfigs: {} as Record<string, PluginConfigObject>,
   }),
   getters: {
     canStartDownload: (state) => state.firmwareReady && state.flasherStatus === "ready",
@@ -126,6 +128,22 @@ export const useFlasherStore = defineStore("flasher", {
     clearStlinkTargetSession(): void {
       this.stlinkTargetSession = null;
     },
+
+    initPluginConfig(pluginId: string, defaults: PluginConfigObject): void {
+      if (!this.pluginConfigs[pluginId]) {
+        this.pluginConfigs[pluginId] = { ...defaults };
+      }
+    },
+    setPluginConfig(pluginId: string, config: PluginConfigObject): void {
+      this.pluginConfigs[pluginId] = { ...config };
+    },
+    updatePluginConfigField(pluginId: string, key: string, value: string | number | boolean): void {
+      const current = this.pluginConfigs[pluginId] ?? {};
+      this.pluginConfigs[pluginId] = { ...current, [key]: value };
+    },
+    getPluginConfig(pluginId: string): PluginConfigObject | undefined {
+      return this.pluginConfigs[pluginId] ? { ...this.pluginConfigs[pluginId] } : undefined;
+    },
     reset() {
       this.stage = "idle";
       this.downloadResult = "idle";
@@ -147,6 +165,7 @@ export const useFlasherStore = defineStore("flasher", {
       this.targetCandidates = [];
       this.selectedTargetType = null;
       this.stlinkTargetSession = null;
+      this.pluginConfigs = {};
     },
   },
 });
