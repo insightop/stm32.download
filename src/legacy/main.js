@@ -2,6 +2,7 @@
 // This is the legacy HTML+JS entrypoint. The Vue app uses `src/main.ts` and does not
 // depend on this file. It is kept temporarily for reference/rollback.
 
+import "./style.css";
 import UARTISP, { hexToBin } from "./uart_isp.js";
 import WebStlink from "../../vendor/protocols/webstlink/src/webstlink.js";
 import { Logger } from "../../vendor/protocols/webstlink/src/lib/package.js";

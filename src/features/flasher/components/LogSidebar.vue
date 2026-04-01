@@ -158,8 +158,8 @@ const onExport = (): void => {
   width: 100%;
   min-width: 0;
   height: 100%;
-  background: var(--surface-contrast);
-  color: var(--text-inverse);
+  background: var(--surface-bg);
+  color: var(--text-primary);
   border-left: 1px solid var(--border-default);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -201,13 +201,13 @@ const onExport = (): void => {
 }
 .title-icon {
   flex-shrink: 0;
-  color: var(--text-inverse);
+  color: var(--text-primary);
   opacity: 0.9;
 }
 .title-text {
   margin: 0;
   font-size: 14px;
-  color: var(--text-inverse);
+  color: var(--text-primary);
   text-align: left;
 }
 .content {

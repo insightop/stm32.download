@@ -64,7 +64,6 @@ const formatContext = (ctx: unknown): string => {
           v-if="entry.context !== undefined"
           class="ctx"
         >
-          <span class="ctx-label">{{ t("log.context") }}</span>
           <pre class="ctx-body">{{ formatContext(entry.context) }}</pre>
         </div>
       </div>
@@ -144,13 +143,6 @@ const formatContext = (ctx: unknown): string => {
   color: var(--log-text-primary);
   white-space: pre-wrap;
   word-break: break-word;
-}
-.ctx-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 2px;
 }
 .ctx-body {
   margin: 0;
