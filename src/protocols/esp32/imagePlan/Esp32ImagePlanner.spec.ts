@@ -22,4 +22,13 @@ describe("Esp32ImagePlanner", () => {
       }),
     ).toThrow(/overlap/i);
   });
+
+  it("buildPlanFromSegmentPayloads sorts by address", () => {
+    const planner = new Esp32ImagePlanner();
+    const plan = planner.buildPlanFromSegmentPayloads([
+      { slotId: "b", address: 0x20000, data: new Uint8Array([2]), label: "b" },
+      { slotId: "a", address: 0x1000, data: new Uint8Array([1]), label: "a" },
+    ]);
+    expect(plan.segments.map((s) => s.address)).toEqual([0x1000, 0x20000]);
+  });
 });

@@ -29,6 +29,11 @@ export class WebSerialTransport implements SerialTransport {
     return `Serial ${vendor}:${product}`;
   }
 
+  /**
+   * 已打开且流可用时直接返回（幂等）。STM32 等协议在会话开始即 open；ESP32（esptool-js）由
+   * vendor 在 `probe` 内 `Transport.connect` 打开，会话层可跳过对本方法的首次调用（见
+   * `FlasherProtocol.defersTransportOpen`）。
+   */
   async open(): Promise<void> {
     if (!this.port) {
       await this.selectDevice();

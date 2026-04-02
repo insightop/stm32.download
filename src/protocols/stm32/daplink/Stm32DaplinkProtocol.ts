@@ -1,9 +1,16 @@
-import type { FlashPlan, StageProgress } from "@/core/types/download";
+import { getFirmwareSegmentsFromTask } from "@/core/firmware/normalizeFirmwareToSegments";
+import type { DownloadTaskInput, FlashPlan, StageProgress } from "@/core/types/download";
+import { ErrorCode, type DownloadError } from "@/core/errors/ErrorCode";
 import type { FlasherProtocol, ProbeResult } from "@/protocols/types";
 import { createDaplinkAdapter, type DaplinkAdapter } from "@/transports/adapters/daplink.adapter";
 
 export class Stm32DaplinkProtocol implements FlasherProtocol {
   private readonly adapter: DaplinkAdapter = createDaplinkAdapter();
+
+  private mkError(code: ErrorCode, userMessage: string, cause: unknown): DownloadError {
+    const debugMessage = cause instanceof Error ? cause.message : String(cause);
+    return { code, userMessage, debugMessage, cause };
+  }
 
   async probe(): Promise<ProbeResult> {
     await this.adapter.connect();
@@ -13,7 +20,20 @@ export class Stm32DaplinkProtocol implements FlasherProtocol {
   async sync(): Promise<void> {}
 
   async buildPlan(input: unknown): Promise<FlashPlan> {
-    return input as FlashPlan;
+    const payload = input as DownloadTaskInput;
+    const segments = getFirmwareSegmentsFromTask(payload);
+    const app = segments.find((s) => s.slotId === "app") ?? segments[0];
+    if (!app) {
+      throw this.mkError(
+        ErrorCode.FlashPlanInvalid,
+        "STM32 DAP-Link 需要有效固件段",
+        new Error("Invalid STM32 DAP-Link input"),
+      );
+    }
+    return {
+      chipFamily: "stm32",
+      segments: [{ address: app.address, data: app.data, label: app.label ?? "app" }],
+    };
   }
 
   async erase(): Promise<void> {}

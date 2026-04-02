@@ -1,3 +1,4 @@
+import { getFirmwareSegmentsFromTask } from "@/core/firmware/normalizeFirmwareToSegments";
 import type { DownloadTaskInput, FlashPlan, StageProgress } from "@/core/types/download";
 import type { FlasherProtocol, ProbeResult } from "@/protocols/types";
 import { ErrorCode, type DownloadError, isUserCancelledError } from "@/core/errors/ErrorCode";
@@ -45,17 +46,18 @@ export class Stm32StlinkProtocol implements FlasherProtocol {
 
   async buildPlan(input: unknown): Promise<FlashPlan> {
     const payload = input as DownloadTaskInput;
-    if (payload.firmware.kind !== "single-bin" || payload.firmware.items.length === 0) {
+    const segments = getFirmwareSegmentsFromTask(payload);
+    const app = segments.find((s) => s.slotId === "app") ?? segments[0];
+    if (!app) {
       throw this.mkError(
         ErrorCode.FlashPlanInvalid,
-        "STM32 ST-Link 需要单镜像输入（single-bin）",
+        "STM32 ST-Link 需要有效固件段",
         new Error("Invalid STM32 ST-Link input"),
       );
     }
-    const item = payload.firmware.items[0];
     return {
       chipFamily: "stm32",
-      segments: [{ address: item.address, data: item.data, label: item.label ?? "app" }],
+      segments: [{ address: app.address, data: app.data, label: app.label ?? "app" }],
     };
   }
 

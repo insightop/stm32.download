@@ -1,5 +1,6 @@
 import type { PluginConfigObject } from "@/plugins/config/pluginConfig.types";
 import { normalizeConfigBySchema } from "@/plugins/config/pluginConfig.validators";
+import { stm32UserAddressPolicy } from "@/plugins/firmwareInputPresets";
 import type { FlasherPlugin } from "@/plugins/types";
 import { Stm32StlinkProtocol } from "@/protocols/stm32/stlink/Stm32StlinkProtocol";
 import { WebUsbTransport } from "@/transports/usb/WebUsbTransport";
@@ -48,6 +49,7 @@ export const stm32StlinkPlugin: FlasherPlugin = {
   canFlash: true,
   priority: 100,
   supportedInputs: ["single-bin"],
+  firmwareInputPolicy: stm32UserAddressPolicy,
   featureFlags: ["verify", "auto-reset"],
   configSchema: STLINK_CONFIG_SCHEMA,
   createDefaultConfig: defaultConfig,

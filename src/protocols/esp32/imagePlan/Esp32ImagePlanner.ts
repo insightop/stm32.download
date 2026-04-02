@@ -1,4 +1,4 @@
-import type { FlashPlan, FlashSegment } from "@/core/types/download";
+import type { FlashPlan, FlashSegment, FirmwareSegmentPayload } from "@/core/types/download";
 
 export interface Esp32SingleBinInput {
   kind: "single-bin";
@@ -31,6 +31,21 @@ const DEFAULT_ADDR = {
 };
 
 export class Esp32ImagePlanner {
+  /**
+   * 由规范段载荷直接生成 Flash 计划（按地址排序，与槽位名无关）。
+   */
+  buildPlanFromSegmentPayloads(items: FirmwareSegmentPayload[]): FlashPlan {
+    const segments: FlashSegment[] = items
+      .filter((s) => s.data.byteLength > 0)
+      .map((i) => ({
+        address: i.address,
+        data: i.data,
+        label: i.label ?? i.note ?? i.slotId,
+      }));
+    this.validateSegments(segments);
+    return { chipFamily: "esp32", segments: [...segments].sort((a, b) => a.address - b.address) };
+  }
+
   buildPlan(input: Esp32ImageInput): FlashPlan {
     const segments: FlashSegment[] = [];
     if (input.kind === "single-bin") {

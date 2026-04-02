@@ -20,6 +20,30 @@ function createProtocol(): FlasherProtocol {
 }
 
 describe("DownloadSession", () => {
+  it("skips transport.open when protocol.defersTransportOpen and device is ready", async () => {
+    const open = vi.fn(async () => undefined);
+    const transport = {
+      name: "mock",
+      open,
+      isDeviceReady: () => true,
+      close: vi.fn(async () => undefined),
+      write: vi.fn(async () => undefined),
+      read: vi.fn(async () => new Uint8Array()),
+      releaseSession: vi.fn(async () => undefined),
+    } as Transport & { isDeviceReady: () => boolean; releaseSession: () => Promise<void> };
+    const protocol: FlasherProtocol = {
+      defersTransportOpen: true,
+      probe: vi.fn(async () => ({ chipFamily: "esp32", chipName: "ESP32" })),
+      sync: vi.fn(async () => undefined),
+      buildPlan: vi.fn(async () => fakePlan),
+      erase: vi.fn(async () => undefined),
+      write: vi.fn(async () => undefined),
+    };
+    const session = new DownloadSession({ transport, protocol });
+    await session.run({});
+    expect(open).not.toHaveBeenCalled();
+  });
+
   it("releases session resources without disconnecting selected device", async () => {
     const releaseSession = vi.fn(async () => undefined);
     const close = vi.fn(async () => undefined);

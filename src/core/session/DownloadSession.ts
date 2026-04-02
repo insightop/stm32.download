@@ -1,6 +1,7 @@
 import { ErrorCode, type DownloadError } from "@/core/errors/ErrorCode";
 import { transitionStage } from "@/core/stateMachine/downloadMachine";
 import type { DownloadStage, StageProgress } from "@/core/types/download";
+import { i18n } from "@/i18n";
 import type { FlasherProtocol } from "@/protocols/types";
 import type { Transport } from "@/transports/types";
 
@@ -30,7 +31,20 @@ export class DownloadSession {
       this.move("SELECT_FIRMWARE");
       this.move("START");
 
-      await this.deps.transport.open();
+      const deferOpen = this.deps.protocol.defersTransportOpen === true;
+      if (deferOpen) {
+        const ready = this.deps.transport.isDeviceReady?.() ?? false;
+        if (!ready) {
+          const err: DownloadError = {
+            code: ErrorCode.ConnectionFailed,
+            userMessage: String(i18n.global.t("flasherPage.selectConnectionFirst")),
+            debugMessage: "Serial port is not selected",
+          };
+          throw err;
+        }
+      } else {
+        await this.deps.transport.open();
+      }
       this.move("CONNECT_OK");
 
       await this.deps.protocol.probe();

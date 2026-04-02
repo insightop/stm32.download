@@ -1,5 +1,6 @@
 import type { PluginConfigObject } from "@/plugins/config/pluginConfig.types";
 import { normalizeConfigBySchema } from "@/plugins/config/pluginConfig.validators";
+import { stm32FixedAddressPolicy } from "@/plugins/firmwareInputPresets";
 import type { FlasherPlugin } from "@/plugins/types";
 import { Stm32UartProtocol } from "@/protocols/stm32/serial/Stm32UartProtocol";
 import { WebSerialTransport } from "@/transports/serial/WebSerialTransport";
@@ -38,6 +39,7 @@ export const stm32SerialPlugin: FlasherPlugin = {
   canFlash: true,
   priority: 100,
   supportedInputs: ["single-bin"],
+  firmwareInputPolicy: stm32FixedAddressPolicy,
   featureFlags: ["verify", "cancel"],
   configSchema: SERIAL_CONFIG_SCHEMA,
   createDefaultConfig: defaultConfig,

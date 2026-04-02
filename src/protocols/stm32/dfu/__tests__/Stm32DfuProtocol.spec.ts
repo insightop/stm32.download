@@ -25,20 +25,20 @@ describe("Stm32DfuProtocol", () => {
     expect(plan.segments[0].data.byteLength).toBe(2);
   });
 
-  it("buildPlan rejects non single-bin", async () => {
+  it("buildPlan uses app segment from legacy multi-image", async () => {
     const p = new Stm32DfuProtocol(mkTransport());
-    await expect(
-      p.buildPlan({
-        chipFamily: "stm32",
-        flasherType: "usb-dfu",
-        firmware: {
-          kind: "multi-image",
-          bootloader: { address: 0, data: new Uint8Array() },
-          partitionTable: { address: 0, data: new Uint8Array() },
-          app: { address: 0, data: new Uint8Array() },
-        },
-      }),
-    ).rejects.toBeTruthy();
+    const plan = await p.buildPlan({
+      chipFamily: "stm32",
+      flasherType: "usb-dfu",
+      firmware: {
+        kind: "multi-image",
+        bootloader: { address: 0x1000, data: new Uint8Array([9]) },
+        partitionTable: { address: 0x8000, data: new Uint8Array([8]) },
+        app: { address: 0x0800_4000, data: new Uint8Array([1, 2]) },
+      },
+    });
+    expect(plan.segments[0].address).toBe(0x0800_4000);
+    expect(plan.segments[0].data.byteLength).toBe(2);
   });
 
   it("write reports progress from adapter", async () => {

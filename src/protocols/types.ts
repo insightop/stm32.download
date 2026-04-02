@@ -7,6 +7,11 @@ export interface ProbeResult {
 }
 
 export interface FlasherProtocol {
+  /**
+   * When true, `DownloadSession` will not call `transport.open()` before `probe()`.
+   * Use for vendors (e.g. esptool-js) that open the same `SerialPort` inside `probe`.
+   */
+  readonly defersTransportOpen?: boolean;
   probe(): Promise<ProbeResult>;
   sync(): Promise<void>;
   buildPlan(input: unknown): Promise<FlashPlan>;

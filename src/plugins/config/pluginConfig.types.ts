@@ -52,10 +52,15 @@ export interface Stm32StlinkPluginConfig {
   debugClockHz: number;
 }
 
+export interface Esp32SerialPluginConfig {
+  baudRate: number;
+  esptoolDebugLogging?: boolean;
+}
+
 export interface PluginConfigMap {
   "stm32-serial": Stm32SerialPluginConfig;
   "stm32-st-link": Stm32StlinkPluginConfig;
   "stm32-usb-dfu": Record<string, never>;
   "stm32-dap-link": Record<string, never>;
-  "esp32-serial": Record<string, never>;
+  "esp32-serial": Esp32SerialPluginConfig;
 }

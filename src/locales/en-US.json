@@ -29,10 +29,33 @@
   },
   "firmware": {
     "input": "Input",
+    "modeSingle": "Single segment",
+    "modeMulti": "Multi-segment ({count} slots)",
+    "modeDynamic": "Dynamic segments ({min}–{max} rows)",
+    "addRow": "Add row",
+    "removeRow": "Remove row",
+    "note": "Note",
+    "notePlaceholder": "Optional, shown in logs",
+    "minRowsNotMet": "Select firmware for enough rows to satisfy the minimum segment count",
     "noFile": "No file (.hex / .bin / .elf)",
-    "dragHint": "Drag firmware here",
+    "dragHint": "Choose a firmware file or drag it here",
+    "tableFile": "Firmware file",
+    "tableAddress": "Flash address",
+    "addressHiddenHint": "—",
+    "addressResolvedHint": "Flash address comes from Intel HEX or the chip default base; not editable here.",
     "selectFile": "Select file",
-    "unavailable": "This mode is unavailable. {hint}"
+    "unavailable": "This mode is unavailable. {hint}",
+    "flashAddress": "Flash address",
+    "slotOptional": "optional",
+    "slotRequired": "Select a file for each required slot",
+    "hexMultiSlotHint": "Use .bin per slot for multi-segment flashing. Intel HEX is only supported for a single app slot.",
+    "elfNotImplemented": "ELF files are not supported yet",
+    "slots": {
+      "app": "Application (app)",
+      "bootloader": "Bootloader",
+      "partitionTable": "Partition table",
+      "otaData": "OTA data"
+    }
   },
   "download": {
     "idle": "Download",
@@ -43,6 +66,7 @@
   "logMessages": {
     "stage": "Stage: {stage}",
     "progress": "Progress {percent}% ({written} / {total}, {speed}, ETA {eta})",
+    "esp32ProbeOk": "ESP32 probe OK: {chipName}, baud {baudRate}",
     "starting": "Starting download",
     "usingPlugin": "Using plugin: {name}",
     "succeeded": "Download succeeded",
@@ -117,6 +141,13 @@
       "kb": "KB"
     }
   },
+  "esp": {
+    "flashPlanInvalid": "Invalid ESP32 firmware payload or missing data. Re-select a .bin/.hex file.",
+    "probeFailed": "ESP32 probe/connection failed. Check boot mode, wiring, and baud rate.",
+    "connectionFailed": "ESP32 serial session not established. Reselect the device and retry.",
+    "flashFailed": "ESP32 flash write failed. Check connection stability and image addresses.",
+    "resetFailed": "ESP32 reset failed. Try the reset button or power cycle."
+  },
   "dfu": {
     "probeFailed": "DFU probe failed. Ensure device is in DFU mode.",
     "syncFailed": "Failed to synchronize DFU state. Reconnect and retry.",
@@ -130,6 +161,16 @@
       "baudRate": {
         "label": "Baud rate",
         "help": "Serial open speed, common values: 115200 / 460800"
+      }
+    },
+    "esp32": {
+      "baudRate": {
+        "label": "Baud rate",
+        "help": "Must match Web Serial open speed; common: 460800 / 921600"
+      },
+      "esptoolDebugLogging": {
+        "label": "esptool debug logging",
+        "help": "Verbose esptool-js console output (for troubleshooting)"
       }
     },
     "stlink": {

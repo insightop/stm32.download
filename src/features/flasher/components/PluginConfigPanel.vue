@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NSwitch } from "naive-ui";
-import { useI18n } from "vue-i18n";
+import FormFieldRow from "@/features/flasher/components/FormFieldRow.vue";
 import NumberField from "@/features/flasher/components/config-fields/NumberField.vue";
 import PresetNumberField from "@/features/flasher/components/config-fields/PresetNumberField.vue";
 import SelectField from "@/features/flasher/components/config-fields/SelectField.vue";
@@ -14,8 +14,6 @@ defineProps<{
 const emit = defineEmits<{
   "update:field": [key: string, value: string | number | boolean];
 }>();
-
-const { t } = useI18n();
 </script>
 
 <template>
@@ -24,17 +22,12 @@ const { t } = useI18n();
     class="plugin-params"
   >
     <div class="config-grid">
-      <div
+      <FormFieldRow
         v-for="field in schema.fields"
         :key="field.key"
-        class="config-row"
+        :label-key="field.labelI18nKey"
+        :help-key="field.helpI18nKey"
       >
-        <label class="config-label">{{ t(field.labelI18nKey) }}</label>
-        <small
-          v-if="field.helpI18nKey"
-          class="config-help"
-        >{{ t(field.helpI18nKey) }}</small>
-
         <NumberField
           v-if="field.type === 'number'"
           :value="Number(config[field.key] ?? 0)"
@@ -64,7 +57,7 @@ const { t } = useI18n();
           :value="Boolean(config[field.key])"
           @update:value="(v) => emit('update:field', field.key, Boolean(v))"
         />
-      </div>
+      </FormFieldRow>
     </div>
   </div>
 </template>
@@ -76,19 +69,8 @@ const { t } = useI18n();
   border-top: 1px solid color-mix(in srgb, var(--border-default) 55%, transparent);
 }
 .config-grid {
-  display: grid;
-  gap: 12px;
-}
-.config-row {
-  display: grid;
-  gap: 6px;
-}
-.config-label {
-  font-size: 13px;
-  color: var(--text-primary);
-}
-.config-help {
-  color: var(--text-muted);
-  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 </style>

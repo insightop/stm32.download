@@ -1,21 +1,24 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import type { FirmwareInputPanelExpose } from "@/features/flasher/components/firmwareInputPanelExpose";
 import { useI18n } from "vue-i18n";
-import { NButton, NText, NUpload, NUploadDragger, type UploadFileInfo } from "naive-ui";
+import { NText } from "naive-ui";
 import { DocumentAttachOutline } from "@vicons/ionicons5";
 import type { DownloadTaskInput } from "@/core/types/download";
+import { buildFirmwareSegmentsPayload } from "@/core/firmware/buildFirmwareSegmentsPayload";
+import { createEmptyRows } from "@/core/firmware/firmwareRowDraft";
+import type { FirmwareRowDraft } from "@/core/firmware/firmwareRowDraft";
 import FunctionZone from "@/features/flasher/components/FunctionZone.vue";
+import FirmwareDynamicRows from "@/features/flasher/components/FirmwareDynamicRows.vue";
 import { useFlasherStore } from "@/features/flasher/stores/flasher.store";
 import { globalPluginRegistry } from "@/plugins/registry";
 import { detectBrowserCapabilities, getBrowserSupportHint } from "@/plugins/capabilities";
-import { parseIntelHex } from "@/shared/firmware/hex";
 import { flasherLogger } from "@/features/flasher/services/flasherLogger";
 
 const store = useFlasherStore();
 const { t } = useI18n();
-const file = ref<File | null>(null);
-const uploadFileList = ref<UploadFileInfo[]>([]);
+
+const rows = ref<FirmwareRowDraft[]>([]);
 
 const capabilities = computed(() => detectBrowserCapabilities());
 const selectedPlugin = computed(() =>
@@ -26,8 +29,17 @@ const selectedPlugin = computed(() =>
   }),
 );
 
-const inputMode = computed(() =>
-  selectedPlugin.value?.supportedInputs.includes("multi-image") ? "single-bin/multi-image" : "single-bin",
+watch(
+  selectedPlugin,
+  (plugin) => {
+    if (!plugin) {
+      rows.value = [];
+      return;
+    }
+    const p = plugin.firmwareInputPolicy;
+    rows.value = createEmptyRows(p.defaultRows, p.defaultAppAddress);
+  },
+  { immediate: true },
 );
 
 const unavailableHint = computed(() => {
@@ -35,64 +47,105 @@ const unavailableHint = computed(() => {
   return "";
 });
 
-const firmwareFingerprint = computed((): string | null =>
-  file.value
-    ? JSON.stringify([file.value.name, file.value.size, file.value.lastModified] as const)
-    : null,
+function anyElfSelected(): boolean {
+  for (const row of rows.value) {
+    if (row.file?.name.toLowerCase().endsWith(".elf")) return true;
+  }
+  return false;
+}
+
+const firmwareReady = computed((): boolean => {
+  const plugin = selectedPlugin.value;
+  if (!plugin || anyElfSelected()) return false;
+  const p = plugin.firmwareInputPolicy;
+  const filled = rows.value.filter((r) => r.file);
+  if (filled.length < p.minRows) return false;
+  return filled.length > 0;
+});
+
+watch(
+  firmwareReady,
+  (ready) => {
+    store.setFirmwareReady(ready && Boolean(selectedPlugin.value));
+  },
+  { immediate: true },
 );
 
-const onFileChange = (fileList: UploadFileInfo[]): void => {
-  const latest = fileList[0] ?? null;
-  uploadFileList.value = latest ? [latest] : [];
-  file.value = latest?.file ?? null;
-  const isElf = Boolean(file.value?.name.toLowerCase().endsWith(".elf"));
-  store.setFirmwareReady(Boolean(file.value) && !isElf && Boolean(selectedPlugin.value));
-  flasherLogger.info("Firmware selected", {
-    fileName: file.value?.name ?? null,
-    fileSize: file.value?.size ?? null,
-    chipFamily: store.chipFamily,
-    flasherType: store.flasherType,
-  });
-};
+function onRowsUpdate(next: FirmwareRowDraft[]): void {
+  const prevById = Object.fromEntries(rows.value.map((r) => [r.rowId, r]));
+  for (const r of next) {
+    const p = prevById[r.rowId];
+    const f = r.file;
+    if (f && (!p?.file || p.file !== f)) {
+      flasherLogger.info("Firmware selected", {
+        rowId: r.rowId,
+        fileName: f.name,
+        fileSize: f.size,
+        chipFamily: store.chipFamily,
+        flasherType: store.flasherType,
+      });
+    }
+  }
+  rows.value = next;
+}
+
+const firmwareFingerprint = computed((): string | null => {
+  if (!selectedPlugin.value) return null;
+  const parts = rows.value.map((r) => [
+    r.rowId,
+    r.file ? [r.file.name, r.file.size, r.file.lastModified] : null,
+    r.addressStr,
+    r.note ?? "",
+  ]);
+  return JSON.stringify(parts);
+});
 
 defineExpose({
   firmwareFingerprint,
   getInput: async (): Promise<DownloadTaskInput> => {
-    if (!selectedPlugin.value) throw new Error(unavailableHint.value || t("firmware.unavailable", { hint: "" }));
-    if (!file.value) throw new Error("No firmware selected");
-    const fileName = file.value.name.toLowerCase();
-    flasherLogger.debug("Loading firmware file", {
-      rawFileName: file.value.name,
-      sizeBytes: file.value.size,
-      chipFamily: store.chipFamily,
-      flasherType: store.flasherType,
-    });
-    if (fileName.endsWith(".elf")) {
-      throw new Error("ELF parsing not implemented yet");
-    }
-    let data = new Uint8Array(await file.value.arrayBuffer());
-    flasherLogger.trace("Firmware bytes loaded", { bytes: data.byteLength });
-    let address = store.chipFamily === "esp32" ? 0x10000 : 0x08000000;
-    if (fileName.endsWith(".hex")) {
-      const text = await file.value.text();
-      flasherLogger.debug("Parsing Intel HEX", { chars: text.length });
-      const parsed = parseIntelHex(text);
-      data = parsed.bytes;
-      address = parsed.baseAddr;
-      flasherLogger.debug("Intel HEX parsed", {
-        bytes: data.byteLength,
-        baseAddr: `0x${address.toString(16)}`,
-      });
-    }
+    const plugin = selectedPlugin.value;
+    if (!plugin) throw new Error(unavailableHint.value || t("firmware.unavailable", { hint: "" }));
 
-    return {
-      flasherType: store.flasherType,
+    flasherLogger.debug("Loading firmware payload", {
       chipFamily: store.chipFamily,
-      firmware: {
-        kind: "single-bin",
-        items: [{ address, data, label: "app" }],
-      },
-    };
+      flasherType: store.flasherType,
+      rowCount: rows.value.length,
+    });
+
+    try {
+      const firmware = await buildFirmwareSegmentsPayload({
+        chipFamily: plugin.chipFamily,
+        policy: plugin.firmwareInputPolicy,
+        rows: rows.value,
+      });
+      for (const seg of firmware.items) {
+        flasherLogger.trace("Segment ready", {
+          slotId: seg.slotId,
+          address: `0x${seg.address.toString(16)}`,
+          bytes: seg.data.byteLength,
+        });
+      }
+      return {
+        flasherType: store.flasherType,
+        chipFamily: store.chipFamily,
+        firmware,
+      };
+    } catch (e) {
+      const code = e instanceof Error ? e.message : String(e);
+      if (code === "ELF_NOT_IMPLEMENTED") {
+        throw new Error(t("firmware.elfNotImplemented"));
+      }
+      if (code === "HEX_NOT_ALLOWED_MULTI_SLOT") {
+        throw new Error(t("firmware.hexMultiSlotHint"));
+      }
+      if (code === "NO_FIRMWARE_SEGMENTS") {
+        throw new Error(t("firmware.noFile"));
+      }
+      if (code === "MIN_ROWS_NOT_MET") {
+        throw new Error(t("firmware.minRowsNotMet"));
+      }
+      throw e instanceof Error ? e : new Error(String(e));
+    }
   },
 } satisfies FirmwareInputPanelExpose);
 </script>
@@ -103,12 +156,6 @@ defineExpose({
     :title-icon="DocumentAttachOutline"
     help-key="firmware"
   >
-    <NText
-      depth="2"
-      class="hint"
-    >
-      {{ t("firmware.input") }}: {{ inputMode }}
-    </NText>
     <NText
       v-if="store.flasherHint"
       class="warn"
@@ -121,60 +168,15 @@ defineExpose({
     >
       {{ unavailableHint }}
     </NText>
-    <NUpload
-      class="upload"
-      :default-upload="false"
-      :show-file-list="false"
-      :max="1"
-      :file-list="uploadFileList"
-      accept=".hex,.bin,.elf"
-      @update:file-list="onFileChange"
-    >
-      <NUploadDragger>
-        <div class="dragger-content">
-          <NButton size="small">
-            {{ t("firmware.selectFile") }}
-          </NButton>
-          <NText
-            class="file-meta"
-            depth="2"
-          >
-            {{ file ? `${file.name} | ${file.size} bytes` : t("firmware.noFile") }}
-          </NText>
-        </div>
-        <NText
-          class="drag-hint"
-          depth="3"
-        >
-          {{ t("firmware.dragHint") }}
-        </NText>
-      </NUploadDragger>
-    </NUpload>
+    <FirmwareDynamicRows
+      v-if="selectedPlugin"
+      :policy="selectedPlugin.firmwareInputPolicy"
+      :model-value="rows"
+      @update:model-value="onRowsUpdate"
+    />
   </FunctionZone>
 </template>
 
 <style scoped>
-.hint { color: var(--text-muted); font-size: 13px; font-weight: 600; }
 .warn { margin: 0; color: var(--error-500); font-size: 13px; }
-.upload { width: 100%; }
-.dragger-content {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.file-meta {
-  text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-.drag-hint {
-  display: block;
-  margin-top: 8px;
-  text-align: left;
-}
 </style>

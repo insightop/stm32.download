@@ -1,4 +1,5 @@
 import { Stm32DfuProtocol } from "@/protocols/stm32/dfu/Stm32DfuProtocol";
+import { stm32FixedAddressPolicy } from "@/plugins/firmwareInputPresets";
 import type { FlasherPlugin } from "@/plugins/types";
 import type { UsbTransport } from "@/transports/types";
 import { WebUsbTransport } from "@/transports/usb/WebUsbTransport";
@@ -20,6 +21,7 @@ export const stm32DfuPlugin: FlasherPlugin = {
   canFlash: true,
   priority: 100,
   supportedInputs: ["single-bin"],
+  firmwareInputPolicy: stm32FixedAddressPolicy,
   featureFlags: ["dfu"],
   supports: ({ chipFamily, flasherType, capabilities }) =>
     chipFamily === "stm32" && flasherType === "usb-dfu" && capabilities.webUsb,
